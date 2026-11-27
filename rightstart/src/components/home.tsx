@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {

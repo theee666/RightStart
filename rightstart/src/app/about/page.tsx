@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/site-link';
 export const metadata = { title: '关于 RightStart' };
 export default function Page() {
   return (

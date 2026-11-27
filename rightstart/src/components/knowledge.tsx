@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { useState } from 'react';
 import { Search, BookOpen, ExternalLink } from 'lucide-react';
 import { articleIndex as articles, type ArticleSummary as Article } from '@/lib/knowledge-index';

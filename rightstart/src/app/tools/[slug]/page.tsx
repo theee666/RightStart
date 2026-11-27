@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { notFound } from 'next/navigation';
 import { ToolIcon } from '@/components/ui';
 import { ReviewTool } from '@/components/review-tool';

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { MainCards } from '@/components/home';
 import { ToolIcon } from '@/components/ui';
 export const metadata = { title: '职场工具箱' };

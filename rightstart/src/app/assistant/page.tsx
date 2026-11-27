@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { Chat } from '@/components/chat';
 export const metadata = { title: 'AI 职场助手' };
 export default function Page() {

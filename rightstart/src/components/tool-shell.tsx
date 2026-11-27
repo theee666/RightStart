@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { Sparkles, ShieldCheck } from 'lucide-react';
 import { ToolIcon } from './ui';
 export function ToolShell({

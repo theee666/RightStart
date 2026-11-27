@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { useState, useRef } from 'react';
 import { districts } from '@/lib/catalog';
 import { articleIndex as articles } from '@/lib/knowledge-index';

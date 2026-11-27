@@ -1,4 +1,12 @@
 @import 'tailwindcss';
+.navigation-pending {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 3px;
+  background: #29496c;
+  z-index: 100;
+  pointer-events: none;
+}
 .container {
   width: calc(100% - 64px);
   max-width: 1160px;

@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { useEffect, useRef, useState } from 'react';
 import { AssistantMarkdown } from './assistant-markdown';
 import { prepareAssistantAnswer } from '@/lib/assistant-answer';
@@ -21,6 +21,7 @@ export function Chat() {
   const [confirmReset, setConfirmReset] = useState(false);
   const conversation = useRef('');
   const controller = useRef<AbortController | null>(null);
+  const sessionRequest = useRef<Promise<void> | null>(null);
   const scroll = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   async function loadConfig() {
@@ -30,6 +31,8 @@ export function Chat() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setConfig(data);
+      // Prepare the signed session while the user reads/types, rather than on first send.
+      if (data.configured && !data.requiresCode && !data.hasSession) await establishSession();
     } catch (e) {
       setError(e instanceof Error ? e.message : '无法读取服务状态，请刷新重试。');
     }
@@ -47,15 +50,24 @@ export function Chat() {
     scroll.current?.scrollTo({ top: scroll.current.scrollHeight, behavior: 'smooth' });
   }, [messages, busy]);
   async function establishSession() {
-    const response = await fetch('/api/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code }),
-    });
-    assertApplicationResponse(response);
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || '无法建立会话。');
-    setConfig((c) => (c ? { ...c, requiresCode: false, hasSession: true } : c));
+    if (sessionRequest.current) return sessionRequest.current;
+    const pending = (async () => {
+      const response = await fetch('/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      assertApplicationResponse(response);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || '无法建立会话。');
+      setConfig((c) => (c ? { ...c, requiresCode: false, hasSession: true } : c));
+    })();
+    sessionRequest.current = pending;
+    try {
+      await pending;
+    } finally {
+      if (sessionRequest.current === pending) sessionRequest.current = null;
+    }
   }
   async function authorize(e: React.FormEvent) {
     e.preventDefault();
@@ -95,7 +107,6 @@ export function Chat() {
       if (!config?.configured)
         throw new Error('AI 服务尚未配置，请由项目管理员填写服务端 DIFY_API_KEY 后重试。');
       if (config.requiresCode) throw new Error('请先输入课堂访问码。');
-      if (!config.hasSession) await establishSession();
       setMessages((m) => [
         ...m,
         { id: crypto.randomUUID(), role: 'user', content: query },
@@ -103,6 +114,8 @@ export function Chat() {
       ]);
       added = true;
       setInput('');
+      if (!config.hasSession) await establishSession();
+      if (ctrl.signal.aborted) return;
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

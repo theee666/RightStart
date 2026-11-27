@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { notFound } from 'next/navigation';
 import { articles } from '@/lib/knowledge';
 import { SourceLinks } from '@/components/knowledge';

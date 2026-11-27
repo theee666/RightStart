@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/site-link';
 export default function NotFound() {
   return (
     <div className="container page empty-state">

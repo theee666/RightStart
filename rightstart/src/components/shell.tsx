@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Sparkles, ChevronDown } from 'lucide-react';
 import { useState } from 'react';

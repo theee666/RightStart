@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/site-link';
 export const metadata = { title: '隐私与使用说明' };
 export default function Page() {
   return (

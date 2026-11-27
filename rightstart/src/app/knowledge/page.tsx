@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/site-link';
 import { KnowledgeCenter } from '@/components/knowledge';
 export const metadata = { title: '职场知识中心' };
 export default function Page() {
