@@ -1,5 +1,14 @@
 {
   "nodeFunctionsConfig": {
     "maxDuration": 120
-  }
+  },
+  "headers": [
+    { "source": "/", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
+    { "source": "/tools", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
+    { "source": "/tools/*", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
+    { "source": "/knowledge", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
+    { "source": "/knowledge/*", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
+    { "source": "/about", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
+    { "source": "/privacy", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] }
+  ]
 }

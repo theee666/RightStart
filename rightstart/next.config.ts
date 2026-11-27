@@ -2,8 +2,6 @@ import type { NextConfig } from 'next';
 const config: NextConfig = {
   ...(process.env.RIGHTSTART_PORTABLE === '1' ? { output: 'standalone' as const } : {}),
   poweredByHeader: false,
-  // Reuse public page payloads on repeat navigation; authenticated API responses stay no-store.
-  experimental: { staleTimes: { dynamic: 300, static: 300 } },
   env: { NEXT_PUBLIC_BOT_PROTECTION: process.env.VERCEL === '1' ? 'true' : 'false' },
   async headers() {
     return [
