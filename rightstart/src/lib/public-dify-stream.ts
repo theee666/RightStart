@@ -90,7 +90,7 @@ export function publicDifyStream(source: ReadableStream<Uint8Array>): ReadableSt
         if (closed) return;
         cleanup();
         // Never expose upstream error bodies, prompts, or internal reasoning.
-        controller.enqueue(encoder.encode('data: {"event":"error","message":"AI ????????????????"}\n\n'));
+        controller.enqueue(encoder.encode('data: {"event":"error","message":"AI 回复连接中断或超时，请稍后重试。"}\n\n'));
         controller.close();
         await reader.cancel().catch(() => {});
         reader.releaseLock();
