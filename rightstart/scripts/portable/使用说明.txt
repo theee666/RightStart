@@ -1,0 +1,34 @@
+RightStart 组员本地运行包
+
+1. 先把整个 ZIP 完整解压到普通文件夹，不要在压缩包中直接打开。
+2. Windows 10/11（Intel/AMD 64 位）：双击 Start-Windows.cmd。
+3. Mac（Apple 芯片或 Intel，macOS 11 及以上）：双击 Start-Mac.command，会自动选择运行环境。
+4. 稍等片刻，浏览器自动打开 http://127.0.0.1:3000/ 。也可以手动输入该地址。
+5. 使用期间保持启动窗口打开。关闭网站服务：在启动窗口按 Ctrl+C。
+
+不需要安装 Node.js、npm，也不需要执行 npm install 或构建网站。
+如果 3000 端口被占用，请关闭此前的启动窗口或其他占用该端口的网站，然后重试。
+127.0.0.1 代表各自电脑；每位组员都需要在自己的电脑上启动。
+
+Mac 首次打开
+如果提示无法验证开发者，请先右键 Start-Mac.command 选择“打开”。
+如果仍被系统阻止，在“系统设置 > 隐私与安全性”允许此次打开后重试。
+如果提示脚本没有执行权限，打开“终端”，输入 bash 加空格，将 Start-Mac.command 拖入终端后按回车。
+本包包含 Apple 芯片及 Intel 两类 Mac 的 Node.js 官方运行程序。
+
+AI 助手
+本包包含项目管理员授权的现有 Dify API Key，仅供组员私下使用，不要上传 GitHub 或公开转发。
+AI 助手需要联网，使用共享的 Dify 工作流及额度；Dify 服务、模型和知识库仍由云端提供。
+其他页面、计算器和已打包知识库可以在本地使用。
+如果 AI 提示未配置或连接失败，请确认网络、API Key 和 Dify 服务是否可用。
+修改 AI 配置可编辑 app/.env.local，修改后重新启动。
+首次启动会为本机自动生成 app/.session-secret，无需填写会话密钥。
+
+文件夹内容
+app/         已编译网站、页面资源、服务端接口和运行依赖
+runtime/     Windows x64、Mac Apple 芯片和 Mac Intel 的 Node.js 运行环境及许可证
+source/      网站源码、配置、测试和维护脚本；仅修改源码不会改变已编译的 app，需要重新构建打包
+launch.mjs   自动启动、检查端口并打开浏览器
+validation.json  本次本地检查结果和平台验证范围
+
+本包在 Windows 上制作并验收；Mac 程序来自 Node.js 官方并核对校验值，尚未在真实 Mac 上验收。

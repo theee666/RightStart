@@ -1,0 +1,55 @@
+{
+  "verified_on": "2026-11-26",
+  "build": "passed",
+  "core_tests": 5,
+  "browser": {
+    "checks": [
+      "13 pages respond, render and fit viewport at 1440px",
+      "13 pages respond, render and fit viewport at 768px",
+      "13 pages respond, render and fit viewport at 390px",
+      "13 pages respond, render and fit viewport at 360px",
+      "mobile menu and navigation",
+      "Offer fields, six-point report, clipboard, print and reset",
+      "contract nine-point report",
+      "calculator personal 1620, employer 2900, fund account 1200 with synthetic parameters",
+      "checklist persistence, progress and confirmed reset",
+      "interview personalization, categories and persistence",
+      "knowledge search, empty state, categories and pagination",
+      "subsidy source results and profile handoff to chat composer",
+      "chat quick question and new conversation",
+      "same-origin guard, anonymous authorization, strict variables, UUID validation and rate limit",
+      "no browser runtime errors"
+    ],
+    "passed": 15
+  },
+  "dify_live_two_turns": {
+    "date": "2026-11-26T07:01:00.011Z",
+    "appInfo": true,
+    "parameters": true,
+    "firstTurn": true,
+    "secondTurn": true,
+    "streamComplete": true
+  },
+  "browser_live": {
+    "serverRequests": [
+      {
+        "path": "session",
+        "status": 200
+      },
+      {
+        "path": "session",
+        "status": 200
+      },
+      {
+        "path": "chat",
+        "status": 200
+      }
+    ],
+    "replyCharacters": 2446,
+    "streamComplete": true,
+    "mobileOverflow": false,
+    "newConversationReset": true
+  },
+  "public_bundle_secrets": 0,
+  "deployment": "pending user confirmation"
+}

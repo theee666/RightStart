@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+.vercel/
+.work/
+test-results/
+*.tsbuildinfo
+next-env.d.ts
+# Original project documents and workflow stay local; do not publish by default.
+*.docx
+*.pdf
+*.ifpkg
+DIFY_TXT/
+__pycache__/
+*.pyc

@@ -1,0 +1,12 @@
+.env*
+.vercel/
+.git/
+.next/
+.work/
+node_modules/
+test-results/
+DIFY_TXT/
+*.docx
+*.pdf
+*.ifpkg
+*.tsbuildinfo
