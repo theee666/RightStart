@@ -1,5 +1,27 @@
 # RightStart
 
+## EdgeOne Makers 部署与排障（2026-11-27）
+
+仓库项目根目录为 `rightstart/`；Makers 请选择 Next.js 全栈框架、Node 22、构建命令 `npm run build`、输出目录 `.next`，不要使用 HTML 展示文件或 `output: export`。平台文档支持 Next.js 16、Route Handlers 与响应流；实际函数执行时限以当前账户和运行环境为准，代码的 `maxDuration = 300` 不能突破平台限制。
+
+生产环境必须配置服务端变量 `DIFY_API_KEY`、`DIFY_API_URL=https://api.dify.ai/v1`、`SESSION_SECRET`（至少 32 字符，所有函数实例一致、部署之间保持稳定）。`SITE_ACCESS_CODE` 可选。不要将密钥放进 `NEXT_PUBLIC_*` 或 `next.config.ts` 的 `env` 配置。Makers 生产与预览环境的变量范围需分别确认，修改变量需要新的部署生效。
+
+已明确允许当前项目来源 `https://rightstart.zh-cn.edgeone.cool`，用于修复反向代理将 Host 或协议改为内部地址时产生的误拒绝。新增正式域名时，在服务端设置 `RIGHTSTART_ALLOWED_ORIGINS=https://你的正式域名`；多个完整 HTTPS 来源用逗号分隔，不支持通配符。仍拒绝缺少 Origin、跨站请求及其他未登记来源，不信任任意客户端提供的 X-Forwarded-Host。普通直接部署继续执行原有 Host/协议校验。
+
+Vercel BotID 的服务端验证仅在 `VERCEL=1` 时启用，浏览器初始化使用相同的构建条件。Makers 不应手工复制 `VERCEL=1`；迁移后由同源校验、签名会话、输入验证和原有限流保护应用。进程内限流不等于 Serverless 多实例全局限流，可在平台另配共享限流或 WAF。
+
+`GET /api/health` 不调用 Dify，只返回环境配置是否有效、Node 主版本及 BotID 是否启用；不返回任何变量值、请求头或 Cookie。若返回 503，请按布尔检查结果修复环境配置。
+
+`POST /api/health` 验证从当前部署服务器到 Dify `/info` 和 `/parameters` 的连接。需要有效的同源已授权会话（Vercel 上继续验证 BotID），或者管理员在服务端另行配置至少 32 字符的 `HEALTHCHECK_TOKEN` 并通过 `Authorization: Bearer ...` 提交。不要将令牌放在 URL、前端配置或截图里。接口限流为每 IP 每分钟 2 次，只返回响应状态和能力布尔值，不返回上游正文、不触发模型生成。HTTP 401/403 是上游凭据/权限问题，连接失败或超时需检查云端出站网络；本地直连成功不能证明云端出站正常。
+
+应用 API 响应带 `X-RightStart-API: 1`。若看到 HTML、HTTP 401、`X-EOP-MSG: eo_time missing`，说明请求被 EdgeOne 预览层拦截，尚未到达 Next.js。应先通过控制台最新完整预览链接取得平台 Cookie，再在同一浏览器访问和测试，不要将 eo_token/eo_time 硬编码到源码。过期后从控制台重新打开有效链接。应用不会绕过平台预览校验。
+
+本轮推送前已复现：裸域名首页及三个 API 均被平台返回 401；完整预览校验并取得 Cookie 后，GET session 为 200，POST session 为应用来源校验 403，parameters 因无应用会话返回 401。修复后必须在部署完成后重新核验：health 配置、POST session 的安全 Cookie、parameters、两轮 chat 的 SSE 与 conversation_id；只有构建成功不能视为生产 AI 验收通过。
+
+长期中国大陆访问：在现有项目绑定自己控制且已完成工信部备案的域名，按平台提供的 CNAME 设置解析，申请/配置 HTTPS 证书，将域名绑定到生产环境，并把完整 HTTPS 来源加入 `RIGHTSTART_ALLOWED_ORIGINS`。默认项目/部署域名在中国大陆的 3 小时预览限制不能通过本项目代码关闭。域名购买、备案和 DNS 授权需由域名所有者办理。
+
+官方依据：[Next.js 兼容性](https://pages.edgeone.ai/document/framework-nextjs)、[构建及变量范围](https://cloud.tencent.com/document/product/1552/127392)、[预览域名时效与中国大陆备案要求](https://cloud.tencent.com/document/product/1552/127403)。
+
 面向应届毕业生与职场新人的多页面工具网站。使用 Next.js App Router、TypeScript、Tailwind CSS、Lucide 和 React Markdown；AI 请求由服务端转发至已有 Dify Chatflow，不修改工作流。
 
 ## 本地运行

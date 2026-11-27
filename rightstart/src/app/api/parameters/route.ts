@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getParameters, noStore, session } from '@/lib/dify';
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     if (!(await session())?.authorized)

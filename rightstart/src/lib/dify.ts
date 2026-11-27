@@ -1,6 +1,7 @@
 import 'server-only';
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { cookies } from 'next/headers';
+import { originAllowedFor } from './origin-policy';
 const fallbackSecret = randomBytes(32).toString('hex');
 function secret() {
   const value = process.env.SESSION_SECRET;
@@ -25,6 +26,8 @@ export async function session() {
     !expiry ||
     !auth ||
     !signature ||
+    token.split('.').length !== 4 ||
+    !Number.isFinite(Number(expiry)) ||
     !same(sign(`${id}.${expiry}.${auth}`), signature) ||
     Number(expiry) < Date.now()
   )
@@ -32,22 +35,7 @@ export async function session() {
   return { id, authorized: !process.env.SITE_ACCESS_CODE || auth === 'yes' };
 }
 export function originAllowed(request: Request) {
-  const origin = request.headers.get('origin');
-  if (!origin || request.headers.get('sec-fetch-site') === 'cross-site') return false;
-  try {
-    const source = new URL(origin);
-    const target = new URL(request.url);
-    const host = request.headers.get('host') || target.host;
-    const forwardedProtocol = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
-    const protocol = forwardedProtocol ? `${forwardedProtocol}:` : target.protocol;
-    return (
-      ['http:', 'https:'].includes(source.protocol) &&
-      source.host === host &&
-      source.protocol === protocol
-    );
-  } catch {
-    return false;
-  }
+  return originAllowedFor(request, process.env.RIGHTSTART_ALLOWED_ORIGINS);
 }
 const buckets = new Map<string, { count: number; reset: number }>();
 export function allowed(key: string, limit = 15) {
@@ -85,4 +73,8 @@ export async function getParameters() {
   cache = { value, until: Date.now() + 60000 };
   return value as Record<string, unknown>;
 }
-export const noStore = { 'Cache-Control': 'no-store' };
+export const noStore = {
+  'Cache-Control': 'no-store, no-transform',
+  'CDN-Cache-Control': 'no-store',
+  'X-RightStart-API': '1',
+};

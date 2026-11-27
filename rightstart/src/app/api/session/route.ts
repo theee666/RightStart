@@ -3,8 +3,11 @@ import { NextResponse } from 'next/server';
 import { allowed, noStore, originAllowed, same, session, sign } from '@/lib/dify';
 import { browserVerified } from '@/lib/bot-protection';
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
+    // Validate the signing secret even on the first visit, before a cookie exists.
+    sign('configuration-check');
     const s = await session();
     return NextResponse.json(
       {

@@ -54,6 +54,9 @@ export function publicDifyStream(source: ReadableStream<Uint8Array>): ReadableSt
   const parser = new SSEParser((event) => filter.accept(event as UpstreamEvent));
   return source.pipeThrough(
     new TransformStream<Uint8Array, Uint8Array>({
+      start(controller) {
+        controller.enqueue(encoder.encode(': connected\n\n'));
+      },
       transform(chunk, controller) {
         output = controller;
         try {

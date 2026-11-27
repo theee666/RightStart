@@ -26,12 +26,12 @@ for (const dir of ['src', 'scripts', 'tests', 'docs']) {
 }
 
 const files = [...new Set(candidates)].filter((relative) => existsSync(path.join(root, relative)));
-const secretNames = ['DIFY_API_KEY', 'SESSION_SECRET', 'SITE_ACCESS_CODE', 'VERCEL_TOKEN', 'GITHUB_TOKEN', 'GH_TOKEN'];
+const secretNames = ['DIFY_API_KEY', 'SESSION_SECRET', 'SITE_ACCESS_CODE', 'HEALTHCHECK_TOKEN', 'VERCEL_TOKEN', 'GITHUB_TOKEN', 'GH_TOKEN'];
 const secrets = new Set(secretNames.map((name) => process.env[name]?.trim()).filter((value) => value && value.length >= 8));
 const envPath = path.join(root, '.env.local');
 if (existsSync(envPath)) {
   for (const line of readFileSync(envPath, 'utf8').split(/\r?\n/)) {
-    const match = line.match(/^\s*(DIFY_API_KEY|SESSION_SECRET|SITE_ACCESS_CODE)\s*=\s*(.*?)\s*$/);
+    const match = line.match(/^\s*(DIFY_API_KEY|SESSION_SECRET|SITE_ACCESS_CODE|HEALTHCHECK_TOKEN)\s*=\s*(.*?)\s*$/);
     const value = match?.[2]?.replace(/^(['"])(.*)\1$/, '$2');
     if (value && value.length >= 8) secrets.add(value);
   }

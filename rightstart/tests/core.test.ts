@@ -9,6 +9,33 @@ import {
   prepareAssistantAnswer,
 } from '../src/lib/assistant-answer';
 import { PublicDifyEvents, publicDifyStream } from '../src/lib/public-dify-stream';
+import { originAllowedFor } from '../src/lib/origin-policy';
+import { assertApplicationResponse } from '../src/lib/api-response';
+
+test('known EdgeOne origin survives an internal proxy host without accepting forged hosts', () => {
+  const request = (origin: string, extra = {}) => new Request('http://internal:3000/api/session', {
+    headers: { origin, host: 'internal:3000', 'x-forwarded-proto': 'http', ...extra },
+  });
+  assert.equal(originAllowedFor(request('https://rightstart.zh-cn.edgeone.cool')), true);
+  assert.equal(originAllowedFor(request('https://evil.example', { 'x-forwarded-host': 'evil.example' })), false);
+  assert.equal(originAllowedFor(request('https://rightstart.zh-cn.edgeone.cool.evil.example')), false);
+  assert.equal(originAllowedFor(request('https://another.edgeone.cool')), false);
+  assert.equal(originAllowedFor(request('null')), false);
+  assert.equal(originAllowedFor(request('https://rightstart.zh-cn.edgeone.cool', { 'sec-fetch-site': 'cross-site' })), false);
+  assert.equal(originAllowedFor(request('https://rightstart.example'), 'https://rightstart.example'), true);
+  assert.equal(originAllowedFor(request('https://rightstart.example'), 'https://rightstart.example/unsafe'), false);
+  assert.equal(originAllowedFor(new Request('https://rightstart.example/api/session', { headers: { origin: 'https://rightstart.example' } })), true);
+  assert.equal(originAllowedFor(new Request('https://rightstart.example/api/session')), false);
+});
+
+test('platform preview HTML cannot be interpreted as an application JSON or SSE response', () => {
+  const preview = new Response('<html>preview denied</html>', { status: 401, headers: { 'x-eop-msg': 'eo_time missing', 'Content-Type': 'text/html' } });
+  assert.throws(() => assertApplicationResponse(preview), /预览/);
+  assert.throws(() => assertApplicationResponse(new Response('<html>', { headers: { 'Content-Type': 'text/html' } })), /接口/);
+  assert.doesNotThrow(() => assertApplicationResponse(Response.json({ error: 'auth' }, { status: 401 })));
+  assert.doesNotThrow(() => assertApplicationResponse(new Response('data: {}\n\n', { headers: { 'Content-Type': 'text/event-stream' } }), 'stream'));
+  assert.throws(() => assertApplicationResponse(Response.json({}), 'stream'), /流式/);
+});
 
 test('reasoning markers are safe at every character boundary, including encoded and nested blocks', () => {
   for (const hidden of [

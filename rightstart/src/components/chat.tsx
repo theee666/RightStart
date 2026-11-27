@@ -7,6 +7,7 @@ import { Sparkles, Plus, Send, Square, LoaderCircle, ShieldCheck, RotateCcw } fr
 import { SSEParser } from '@/lib/sse';
 import { prompts } from '@/lib/catalog';
 import { ToolIcon, CopyButton } from './ui';
+import { assertApplicationResponse } from '@/lib/api-response';
 type Message = { id: string; role: 'user' | 'assistant'; content: string };
 type Config = { configured: boolean; requiresCode: boolean; hasSession: boolean };
 export function Chat() {
@@ -25,6 +26,7 @@ export function Chat() {
   async function loadConfig() {
     try {
       const response = await fetch('/api/session', { cache: 'no-store' });
+      assertApplicationResponse(response);
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setConfig(data);
@@ -50,6 +52,7 @@ export function Chat() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code }),
     });
+    assertApplicationResponse(response);
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || '无法建立会话。');
     setConfig((c) => (c ? { ...c, requiresCode: false, hasSession: true } : c));
@@ -106,6 +109,7 @@ export function Chat() {
         body: JSON.stringify({ query, conversation_id: conversation.current }),
         signal: ctrl.signal,
       });
+      assertApplicationResponse(response, 'stream');
       if (!response.ok) {
         let data;
         try {
