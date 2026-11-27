@@ -1,7 +1,7 @@
 import Link from '@/components/site-link';
 import { notFound } from 'next/navigation';
 import { articles } from '@/lib/knowledge';
-import { SourceLinks } from '@/components/knowledge';
+import { SourceLinks } from '@/components/source-links';
 export function generateStaticParams() {
   return articles.map((a) => ({ slug: a.id }));
 }
@@ -29,7 +29,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         </div>
         <h1 style={{ marginTop: 15 }}>{a.title}</h1>
         <p>以下保留项目知识库中的原始片段与出处，供阅读和核实，不直接构成资格或有效性判断。</p>
-        <SourceLinks article={a} />
+        <SourceLinks sources={a.sources} />
       </div>
       <div className={`notice ${a.lead ? 'warning' : ''}`}>
         {a.lead

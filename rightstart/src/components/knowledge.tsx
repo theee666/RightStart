@@ -1,12 +1,12 @@
 'use client';
-import Link from '@/components/site-link';
+import { ArticleLink } from './article-link';
 import { useState } from 'react';
-import { Search, BookOpen, ExternalLink } from 'lucide-react';
+import { Search, BookOpen } from 'lucide-react';
 import { articleIndex as articles, type ArticleSummary as Article } from '@/lib/knowledge-index';
 import { districts } from '@/lib/catalog';
 export function KnowledgeCard({ article: a }: { article: Article }) {
   return (
-    <Link className="knowledge-card" href={`/knowledge/${a.id}`}>
+    <ArticleLink className="knowledge-card" href={`/knowledge/${a.id}`}>
       <div className="meta-row">
         <span className="tag">{a.category}</span>
         <span>{a.district}</span>
@@ -17,7 +17,7 @@ export function KnowledgeCard({ article: a }: { article: Article }) {
       <span className="subtle-link">
         阅读资料与来源 <BookOpen size={13} />
       </span>
-    </Link>
+    </ArticleLink>
   );
 }
 export function KnowledgeCenter() {
@@ -138,17 +138,5 @@ export function KnowledgeCenter() {
         ))}
       </section>
     </>
-  );
-}
-export function SourceLinks({ article }: { article: Article }) {
-  return (
-    <div className="subtitle-links">
-      {article.sources.slice(0, 4).map((s, i) => (
-        <a key={s} href={s} target="_blank" rel="noopener noreferrer" className="button outline">
-          {i === 0 ? '查看官方来源' : `官方补充来源 ${i}`}
-          <ExternalLink size={13} />
-        </a>
-      ))}
-    </div>
   );
 }
