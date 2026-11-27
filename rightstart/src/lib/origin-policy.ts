@@ -1,5 +1,8 @@
 // Exact public origins only. Never trust arbitrary X-Forwarded-Host values or suffix matches.
-export const deploymentOrigins = ['https://rightstart.zh-cn.edgeone.cool'];
+export const deploymentOrigins = [
+  'https://rightstart.zh-cn.edgeone.cool',
+  'https://rightst.asia',
+];
 
 export function originAllowedFor(request: Request, configuredOrigins = ''): boolean {
   const value = request.headers.get('origin');

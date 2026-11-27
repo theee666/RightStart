@@ -17,6 +17,9 @@ test('known EdgeOne origin survives an internal proxy host without accepting for
     headers: { origin, host: 'internal:3000', 'x-forwarded-proto': 'http', ...extra },
   });
   assert.equal(originAllowedFor(request('https://rightstart.zh-cn.edgeone.cool')), true);
+  assert.equal(originAllowedFor(request('https://rightst.asia')), true);
+  assert.equal(originAllowedFor(request('https://rightst.asia.evil.example')), false);
+  assert.equal(originAllowedFor(request('http://rightst.asia')), false);
   assert.equal(originAllowedFor(request('https://evil.example', { 'x-forwarded-host': 'evil.example' })), false);
   assert.equal(originAllowedFor(request('https://rightstart.zh-cn.edgeone.cool.evil.example')), false);
   assert.equal(originAllowedFor(request('https://another.edgeone.cool')), false);
