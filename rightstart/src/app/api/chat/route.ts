@@ -4,7 +4,7 @@ import { allowed, difyConfig, getParameters, noStore, originAllowed, session } f
 import { publicDifyStream } from '@/lib/public-dify-stream';
 import { browserVerified } from '@/lib/bot-protection';
 export const runtime = 'nodejs';
-export const maxDuration = 300;
+export const maxDuration = 120;
 const schema = z
   .object({
     query: z.string().trim().min(1).max(12000),
@@ -75,7 +75,8 @@ export async function POST(request: Request) {
         conversation_id: parsed.data.conversation_id || '',
         auto_generate_name: false,
       }),
-      signal: AbortSignal.any([request.signal, AbortSignal.timeout(270000)]),
+      // Leave time to report a timeout before EdgeOne's 120-second function limit.
+      signal: AbortSignal.any([request.signal, AbortSignal.timeout(110000)]),
       cache: 'no-store',
     });
     if (!response.ok || !response.body) {

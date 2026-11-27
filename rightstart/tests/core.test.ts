@@ -137,6 +137,32 @@ test('server stream handles fragmented UTF-8 and SSE without transmitting privat
   assert.ok(response.includes('actual-id'));
   assert.ok(response.includes('message_end'));
 });
+test('server sends timed heartbeats during upstream silence and cancels upstream on disconnect', async (t) => {
+  t.mock.timers.enable({ apis: ['setInterval'] });
+  let cancelled = false;
+  const source = new ReadableStream<Uint8Array>({
+    cancel() { cancelled = true; },
+  });
+  const reader = publicDifyStream(source).getReader();
+  const decoder = new TextDecoder();
+  assert.match(decoder.decode((await reader.read()).value), /: connected/);
+  const waiting = reader.read();
+  t.mock.timers.tick(10000);
+  assert.match(decoder.decode((await waiting).value), /: keep-alive/);
+  await reader.cancel();
+  assert.equal(cancelled, true);
+  t.mock.timers.tick(20000);
+});
+
+test('upstream stream failures are sanitized and never marked as completed answers', async () => {
+  const source = new ReadableStream<Uint8Array>({
+    start(c) { c.error(new Error('PRIVATE_UPSTREAM_SECRET')); },
+  });
+  const wire = await new Response(publicDifyStream(source)).text();
+  assert.match(wire, /"event":"error"/);
+  assert.ok(!/PRIVATE|message_end/.test(wire));
+});
+
 test('contributions round individual rows to cents, then total', () => {
   const r = calculateContributions([
     { name: 'A', base: 12345.67, personal: 2.5, employer: 6 },

@@ -117,10 +117,18 @@ npm run build
 2. 将源代码、`package.json`、锁文件、配置、README、测试及 `src/data` 提交到独立仓库。
 3. Vercel 导入仓库，框架 Next.js，安装 `npm ci`，构建 `npm run build`，Node 22。
 4. 在 Vercel 服务端环境变量中设置 `DIFY_API_KEY`、`DIFY_API_URL`、至少 32 字符的 `SESSION_SECRET`；课堂访问保护使用 `SITE_ACCESS_CODE`。不要把 `.env.local` 上传到仓库。
-5. `/api/chat` 已设置 `maxDuration = 300`；实际运行时限须结合 Vercel 计划及 Fluid Compute 配置核实。首次政策检索可能较慢。
+5. `/api/chat` 已设置 `maxDuration = 120`，Dify 请求在 110 秒超时，为错误返回预留时间；实际运行时限须结合托管平台配置核实。首次政策检索可能较慢。
 6. 部署后测试手机、桌面、访问码、两轮 AI、计算器和知识库来源，再交付正式网址。
 
 官方参考：[Dify Chatflow](https://docs.dify.ai/en/api-reference/guides/chatflow)、[发送消息](https://docs.dify.ai/en/api-reference/chat-messages/send-chat-message)、[应用参数](https://docs.dify.ai/en/api-reference/applications/get-app-parameters)、[Vercel 函数时限](https://vercel.com/docs/functions/configuring-functions/duration)。参考站分析与页面映射见 [docs/implementation.md](docs/implementation.md)。
+
+## EdgeOne 生产环境
+
+GitHub 项目根目录为 `rightstart`，其下的 `edgeone.json` 设置 `nodeFunctionsConfig.maxDuration: 120`。EdgeOne 默认函数时限为 30 秒，仅设置 Next.js 路由中的 `maxDuration` 不足以保证平台时限生效。超过默认时限时，即使已返回 HTTP 200，SSE 仍可能在回答中途被截断。不要将缺少 `message_end` 的回复误标为完整。
+
+服务端每 10 秒发送不含正文的 SSE 注释保活，即使 Dify 正在检索且没有发送数据也会发送；用户断开时取消上游读取并清理定时器。保活不能突破平台最大运行时限。生产部署后需验证耗时超过 30 秒的真实长回答、正式结束事件和多轮会话。
+
+官方配置：[EdgeOne edgeone.json](https://edgeone.cloud.tencent.com/pages/document/162936771610066944)。环境变量继续通过平台服务端配置，不上传 `.env.local`。
 
 ## 本次验收记录
 

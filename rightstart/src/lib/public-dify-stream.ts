@@ -45,43 +45,64 @@ export class PublicDifyEvents {
 }
 
 export function publicDifyStream(source: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> {
+  const reader = source.getReader();
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
-  let output: TransformStreamDefaultController<Uint8Array>;
+  let closed = false;
+  let heartbeat: ReturnType<typeof setInterval>;
+  let output: ReadableStreamDefaultController<Uint8Array>;
   const filter = new PublicDifyEvents((event) => {
-    output.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+    output.enqueue(encoder.encode('data: ' + JSON.stringify(event) + '\n\n'));
   });
   const parser = new SSEParser((event) => filter.accept(event as UpstreamEvent));
-  return source.pipeThrough(
-    new TransformStream<Uint8Array, Uint8Array>({
-      start(controller) {
-        controller.enqueue(encoder.encode(': connected\n\n'));
-      },
-      transform(chunk, controller) {
-        output = controller;
-        try {
-          parser.feed(decoder.decode(chunk, { stream: true }));
-          // Keep the connection alive even when the upstream sends only private workflow events.
+  function cleanup() {
+    closed = true;
+    clearInterval(heartbeat);
+    filter.finish();
+  }
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      output = controller;
+      controller.enqueue(encoder.encode(': connected\n\n'));
+      // A timer is required: Dify may stay silent during retrieval or model reasoning.
+      heartbeat = setInterval(() => {
+        if (!closed && (controller.desiredSize ?? 0) > 0)
           controller.enqueue(encoder.encode(': keep-alive\n\n'));
-        } catch {
-          controller.enqueue(
-            encoder.encode('data: {"event":"error","message":"AI 回复数据异常，请重新提问。"}\n\n'),
-          );
-          controller.terminate();
+      }, 10000);
+    },
+    async pull(controller) {
+      try {
+        // Respect downstream backpressure while still reading private upstream frames.
+        while (!closed && (controller.desiredSize ?? 0) > 0) {
+          const { done, value } = await reader.read();
+          if (closed) return;
+          if (done) {
+            parser.feed(decoder.decode());
+            parser.finish();
+            cleanup();
+            reader.releaseLock();
+            controller.close();
+            return;
+          }
+          parser.feed(decoder.decode(value, { stream: true }));
         }
-      },
-      flush(controller) {
-        output = controller;
-        try {
-          parser.feed(decoder.decode());
-          parser.finish();
-          filter.finish();
-        } catch {
-          controller.enqueue(
-            encoder.encode('data: {"event":"error","message":"AI 回复连接中断。"}\n\n'),
-          );
-        }
-      },
-    }),
-  );
+      } catch {
+        if (closed) return;
+        cleanup();
+        // Never expose upstream error bodies, prompts, or internal reasoning.
+        controller.enqueue(encoder.encode('data: {"event":"error","message":"AI ????????????????"}\n\n'));
+        controller.close();
+        await reader.cancel().catch(() => {});
+        reader.releaseLock();
+      }
+    },
+    async cancel(reason) {
+      cleanup();
+      try {
+        await reader.cancel(reason);
+      } finally {
+        reader.releaseLock();
+      }
+    },
+  });
 }
