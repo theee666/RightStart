@@ -11,6 +11,32 @@ import {
 import { PublicDifyEvents, publicDifyStream } from '../src/lib/public-dify-stream';
 import { originAllowedFor } from '../src/lib/origin-policy';
 import { assertApplicationResponse } from '../src/lib/api-response';
+import { chunkRecoveryUrl, isChunkLoadFailure } from '../src/lib/chunk-recovery';
+
+test('asset recovery reloads once, preserves the current page, and does not persist user content', () => {
+  const values = new Map<string, string>();
+  const storage = { getItem: (k: string) => values.get(k) ?? null, setItem: (k: string, v: string) => { values.set(k, v); } };
+  const href = 'https://rightst.asia/knowledge/test?q=PRIVATE_INPUT#source';
+  const first = chunkRecoveryUrl(new Error('Loading chunk 123 failed.'), href, storage, 100000);
+  assert.ok(first);
+  const url = new URL(first);
+  assert.equal(url.pathname, '/knowledge/test');
+  assert.equal(url.searchParams.get('q'), 'PRIVATE_INPUT');
+  assert.equal(url.hash, '#source');
+  assert.ok(url.searchParams.has('_rs_reload'));
+  assert.ok(!JSON.stringify([...values]).includes('PRIVATE_INPUT'));
+  assert.equal(chunkRecoveryUrl('ChunkLoadError', href, storage, 110000), null);
+  assert.ok(chunkRecoveryUrl('ChunkLoadError', href, storage, 161000));
+});
+
+test('API failures and normal application errors cannot trigger automatic page reloads', () => {
+  assert.equal(isChunkLoadFailure(new Error('Failed to load chunk /_next/static/chunks/missing.js')), true);
+  for (const error of ['Failed to fetch', 'AI connection timeout', '请求来源验证失败', new Error('invalid input')]) {
+    assert.equal(isChunkLoadFailure(error), false);
+    assert.equal(chunkRecoveryUrl(error, 'https://rightst.asia/', { getItem: () => null, setItem: () => { throw Error('must not write'); } }), null);
+  }
+  assert.equal(chunkRecoveryUrl('ChunkLoadError', 'https://rightst.asia/', { getItem: () => { throw Error('blocked'); }, setItem: () => {} }), null);
+});
 
 test('known EdgeOne origin survives an internal proxy host without accepting forged hosts', () => {
   const request = (origin: string, extra = {}) => new Request('http://internal:3000/api/session', {

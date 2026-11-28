@@ -3,12 +3,109 @@
     "maxDuration": 120
   },
   "headers": [
-    { "source": "/", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
-    { "source": "/tools", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
-    { "source": "/tools/*", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
-    { "source": "/knowledge", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
-    { "source": "/knowledge/*", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
-    { "source": "/about", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] },
-    { "source": "/privacy", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=60" }] }
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/tools",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/tools/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/knowledge",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/knowledge/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/about",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/privacy",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/assistant",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
   ]
 }
