@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Header, Footer } from '@/components/shell';
+import { earlyChunkRecovery } from '@/lib/early-chunk-recovery';
 import './globals.css';
 export const metadata: Metadata = {
   title: { default: 'RightStart｜职场第一步，走得更有底气', template: '%s · RightStart' },
@@ -9,6 +10,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
+      <head>
+        <script id="rightstart-resource-recovery" dangerouslySetInnerHTML={{ __html: earlyChunkRecovery }} />
+      </head>
       <body>
         <Header />
         <main id="main-content">{children}</main>

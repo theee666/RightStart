@@ -12,6 +12,27 @@ import { PublicDifyEvents, publicDifyStream } from '../src/lib/public-dify-strea
 import { originAllowedFor } from '../src/lib/origin-policy';
 import { assertApplicationResponse } from '../src/lib/api-response';
 import { chunkRecoveryUrl, isChunkLoadFailure } from '../src/lib/chunk-recovery';
+import { earlyChunkRecovery } from '../src/lib/early-chunk-recovery';
+import { runInNewContext } from 'node:vm';
+
+test('inline guard recovers initial bootstrap failures before any application bundle loads', () => {
+  let handler: (event: unknown) => void = () => {};
+  const values = new Map<string, string>();
+  const replaced: string[] = [];
+  runInNewContext(earlyChunkRecovery, { URL, window: {
+    addEventListener: (_name: string, listener: typeof handler) => { handler = listener; },
+    location: { href: 'https://rightst.asia/knowledge', origin: 'https://rightst.asia', replace: (url: string) => replaced.push(url) },
+    sessionStorage: { getItem: (k: string) => values.get(k) ?? null, setItem: (k: string, v: string) => values.set(k, v) },
+  } });
+  handler({ target: { tagName: 'IMG', src: 'https://rightst.asia/missing.png' } });
+  handler({ target: { tagName: 'SCRIPT', src: 'https://other.example/_next/static/script.js' } });
+  assert.equal(replaced.length, 0);
+  handler({ target: { tagName: 'SCRIPT', src: 'https://rightst.asia/_next/static/chunks/bootstrap.js' } });
+  handler({ target: { tagName: 'SCRIPT', src: 'https://rightst.asia/_next/static/chunks/bootstrap.js' } });
+  assert.equal(replaced.length, 1);
+  assert.equal(new URL(replaced[0]).pathname, '/knowledge');
+  assert.ok(new URL(replaced[0]).searchParams.has('_rs_reload'));
+});
 
 test('asset recovery reloads once, preserves the current page, and does not persist user content', () => {
   const values = new Map<string, string>();
